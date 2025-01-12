@@ -1,15 +1,54 @@
+#Étape 1 : Installer et charger les bibliothèques nécessaires
+# Installer les bibliothèques (à exécuter une seule fois)
+install.packages("tidyverse")    
+install.packages("caret")       
+install.packages("e1071")        
+install.packages("caTools")     
+install.packages("wooldridge")
+install.packages("readxl")
+install.packages("lmtest")
+install.packages("dplyr")
+install.packages("car")
+install.packages("AER")
+install.packages("sandwich")
+install.packages("corrplot")
+library(wooldridge)
+library(lmtest)
+library(readxl)
+library(dplyr)
+library(sandwich)
+library(AER)
+library(car) 
+library(tidyverse)
+library(caret)
+library(e1071)
+library(caTools)
+library(corrplot)
+
+
 #Étape 1 : Charger et explorer les données
 
 # Charger les données 
 
-diabete<-read_excel("Downloads/Projet Econométrie ETIC/Analyse de données/diabete.xlsx")
-View(diabete)
+
+data<-read_excel("Downloads/Projet Econométrie ETIC/Analyse de données/diabete.xlsx")
+View(data)
 
 # Afficher les premières lignes des données
-head(diabete)
+head(data)
 
 # Avoir une vue d'ensemble du dataset
-summary(diabete)
+summary(data)
+
+#Pregnancies : Nombre de grossesses.
+#Glucose : Concentration de glucose dans le plasma.
+#Blood Pressure : Tension artérielle diastolique.
+#Skin Thickness : Épaisseur de la peau du triceps.
+#Insulin : Taux d'insuline.
+#BMI : Indice de masse corporelle (poids/hauteur²).
+#Diabetes Pedigree Function : Probabilité de diabète basée sur les antécédents familiaux.
+#Age : Âge de la personne.
+#Outcome : Indicateur si la personne est atteinte de diabète (1) ou non (0).
 
 diabete$BMI<-as.numeric(diabete$BMI)
 diabete$DiabetesPedigreeFunction<-as.numeric(diabete$DiabetesPedigreeFunction)
@@ -104,7 +143,7 @@ nrow(test_data)
 #Cela signifie que sur l'ensemble total de  nos données initiales, 614 exemples ont été utilisés pour entraîner le modèle, et 154 exemples ont été mis de côté pour tester la performance. Cette répartition permet de vérifier que le modèle apprend bien à partir de 614 cas et peut généraliser correctement à 154 nouveaux cas.
 
 # Entraîner un modèle de régression logistique
-model_logistic <- glm(Outcome ~ ., data = train_diabete, family = binomial)
+model_logistic <- glm(Outcome ~ ., data = train_data, family = binomial)
 
 # Résumé du modèle
 summary(model_logistic)
@@ -228,7 +267,6 @@ accuracy_rf
 #La précision de notre modèle est de 0.7922, soit environ 79.22%. Cela signifie que dans 79.22% des cas, le modèle a correctement classé les individus entre ceux qui ont le diabète et ceux qui ne l'ont pas.
 #Conclusion :
 #Avec une précision de 79.22%, le modèle montre une performance acceptable pour la prédiction du diabète, bien qu'il commette encore un nombre significatif d'erreurs, notamment des faux négatifs (38). Cela signifie qu'il pourrait manquer certains cas de diabète, ce qui est une préoccupation dans un contexte médical.
-
 
 
 
