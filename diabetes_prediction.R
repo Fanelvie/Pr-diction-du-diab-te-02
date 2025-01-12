@@ -1,73 +1,29 @@
-#Étape 1 : Installer et charger les bibliothèques nécessaires
-# Installer les bibliothèques (à exécuter une seule fois)
-install.packages("tidyverse")    
-install.packages("caret")       
-install.packages("e1071")        
-install.packages("caTools")     
-install.packages("wooldridge")
-install.packages("readxl")
-install.packages("lmtest")
-install.packages("dplyr")
-install.packages("car")
-install.packages("AER")
-install.packages("sandwich")
-library(wooldridge)
-library(lmtest)
-library(readxl)
-library(dplyr)
-library(sandwich)
-library(AER)
-library(car) 
-library(tidyverse)
-library(caret)
-library(e1071)
-library(caTools)
+#Étape 1 : Charger et explorer les données
 
-# Contexte et Motivation
+# Charger les données 
 
-#Le diabète est une maladie chronique qui peut être gérée ou prévenue si elle est détectée à un stade précoce. Utiliser des techniques sur des données de santé permet de prédire les risques de développer le diabète, aidant ainsi les professionnels de la santé à prendre des décisions plus éclairées et à orienter les patients vers des traitements ou des conseils personnalisés.
-
-# Objectifs
-
-
-# Modèle prédictif : Développer un modèle pour prédire le risque de diabète chez une personne en fonction de caractéristiques médicales telles que l'âge, l'indice de masse corporelle (IMC), le taux de glucose, etc.
-
-# Analyse des facteurs : Identifier les variables les plus importantes qui influencent le risque de diabète.
-
-# Visualisation : Présenter les résultats sous forme de graphiques pour mieux comprendre le modèle et ses performances.
-
-
-
-# Jeu de données
-
-## Notre projet utilisera le Pima Indians Diabetes Database, disponible sur des plateformes Kaggle. Ce jeu de données contient des informations médicales sur des femmes âgées de plus de 21 ans issues de la communauté Pima, un groupe ethnique avec un taux de diabète élevé.
-
-## Caractéristiques des données :
-
-#Pregnancies : Nombre de grossesses.
-#Glucose : Concentration de glucose dans le plasma.
-#Blood Pressure : Tension artérielle diastolique.
-#Skin Thickness : Épaisseur de la peau du triceps.
-#Insulin : Taux d'insuline.
-#BMI : Indice de masse corporelle (poids/hauteur²).
-#Diabetes Pedigree Function : Probabilité de diabète basée sur les antécédents familiaux.
-#Age : Âge de la personne.
-#Outcome : Indicateur si la personne est atteinte de diabète (1) ou non (0).
-
-
-
-#Étape 2 : Charger et explorer les données
-
-# Charger les données (le chemin du fichier doit être correct)
-
-data<-read_excel("Downloads/Projet Econométrie ETIC/Analyse de données/diabete.xlsx")
-View(data)
+diabete<-read_excel("Downloads/Projet Econométrie ETIC/Analyse de données/diabete.xlsx")
+View(diabete)
 
 # Afficher les premières lignes des données
-head(data)
+head(diabete)
 
 # Avoir une vue d'ensemble du dataset
-summary(data)
+summary(diabete)
+
+diabete$BMI<-as.numeric(diabete$BMI)
+diabete$DiabetesPedigreeFunction<-as.numeric(diabete$DiabetesPedigreeFunction)
+par(mfrow=c(2,2),cex=0.7)
+boxplot(diabete$Pregnancies,main="Nombre de grossesses",col="blue")
+boxplot(diabete$Glucose,main="Superficie de la propriété en mètres carrés",col="blue" )
+boxplot(prix$Nombre_Chambres,main="Concentration de glucose dans le plasma",col="blue")
+boxplot(diabete$BloodPressure,main="Tension artérielle diastolique",col="blue")
+boxplot(diabete$SkinThickness,main="Épaisseur de la peau du triceps",col="blue")
+boxplot(diabete$Insulin,main="Taux d'insuline",col="blue")
+boxplot(diabete$BMI,main="Indice de masse corporelle (poids/hauteur²",col="blue")
+boxplot(diabete$DiabetesPedigreeFunction,main="Probabilité de diabète basée sur les antécédents familiaux",col="blue")
+boxplot(diabete$Age,main="Âge de la personne",col="blue")
+boxplot(diabete$Outcome,main="Indicateur si la personne est atteinte de diabète (1) ou non (0)",col="blue")
 
 # Vérifier les types de données et les valeurs manquantes
 str(data)
@@ -98,7 +54,14 @@ data <- data %>%
          Insulin = ifelse(is.na(Insulin), median(Insulin, na.rm = TRUE), Insulin),
          BMI = ifelse(is.na(BMI), median(BMI, na.rm = TRUE), BMI))
 
-
+#Verifier si les variables sont corrélé
+par(mfrow=c(1,1),cex=0.7)
+corr.matrix <- cor(diabete)
+corr.matrix
+corrplot(corr.matrix, method = 'square', diag = F, addCoef.col ='black', number.cex = 0.7)
+#Les corrélations les plus importantes pour prédire l'issue du diabète semblent être Glucose et BMI. Les autres variables montrent des corrélations plus faibles.
+#Une corrélation élevée entre Glucose et Outcome suggère que la glycémie est un indicateur clé dans la prédiction du diabète.
+#D'autres variables comme l'âge et le nombre de grossesses montrent aussi des corrélations notables entre elles, mais ont un impact plus faible sur le diabète. La matrice aide à identifier les variables clés influençant le diagnostic du diabète.
 
 
 #Étape 4 : Diviser les données en ensemble d'entraînement et de test
@@ -141,7 +104,7 @@ nrow(test_data)
 #Cela signifie que sur l'ensemble total de  nos données initiales, 614 exemples ont été utilisés pour entraîner le modèle, et 154 exemples ont été mis de côté pour tester la performance. Cette répartition permet de vérifier que le modèle apprend bien à partir de 614 cas et peut généraliser correctement à 154 nouveaux cas.
 
 # Entraîner un modèle de régression logistique
-model_logistic <- glm(Outcome ~ ., data = train_data, family = binomial)
+model_logistic <- glm(Outcome ~ ., data = train_diabete, family = binomial)
 
 # Résumé du modèle
 summary(model_logistic)
@@ -213,7 +176,7 @@ install.packages("pROC")
 library(pROC)
 
 # Tracer la courbe ROC et calculer l'AUC
-roc_curve <- roc(test_data$Outcome, predictions)
+roc_curve <- roc(test_diabete$Outcome, predictions)
 plot(roc_curve, col = "blue", main = "Courbe ROC")
 
 #La courbe ROC trace la sensibilité en fonction de 1. La ligne en diagonale grise représente un modèle de classification aléatoire, c'est-à-dire un modèle qui prédit sans information pertinente (AUC = 0.5). Plus notre courbe s'éloigne de cette diagonale vers le coin supérieur gauche, meilleur est notre modèle.
@@ -265,21 +228,6 @@ accuracy_rf
 #La précision de notre modèle est de 0.7922, soit environ 79.22%. Cela signifie que dans 79.22% des cas, le modèle a correctement classé les individus entre ceux qui ont le diabète et ceux qui ne l'ont pas.
 #Conclusion :
 #Avec une précision de 79.22%, le modèle montre une performance acceptable pour la prédiction du diabète, bien qu'il commette encore un nombre significatif d'erreurs, notamment des faux négatifs (38). Cela signifie qu'il pourrait manquer certains cas de diabète, ce qui est une préoccupation dans un contexte médical.
-
-### Entraîner un modèle SVM
-model_svm <- svm(Outcome ~ ., data = train_data)
-
-# Prédictions et évaluation sur l'ensemble de test
-pred_svm <- predict(model_svm, test_data)
-conf_matrix_svm <- table(test_data$Outcome, pred_svm)
-conf_matrix_svm
-
-# Calculer l'exactitude
-accuracy_svm <- sum(diag(conf_matrix_svm)) / sum(conf_matrix_svm)
-accuracy_svm
-
-
-
 
 
 
