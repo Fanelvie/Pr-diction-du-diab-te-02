@@ -1,3 +1,7 @@
+# Prédiction du diabète
+
+Modèle pour prédire le risque de diabète chez une personne en fonction de caractéristiques médicales
+
 # Contexte et Motivation
 
 Le diabète est une maladie chronique qui peut être gérée ou prévenue si elle est détectée à un stade précoce. Utiliser des techniques sur des données de santé permet de prédire les risques de développer le diabète, aidant ainsi les professionnels de la santé à prendre des décisions plus éclairées et à orienter les patients vers des traitements ou des conseils personnalisés.
