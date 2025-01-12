@@ -32,13 +32,13 @@ library(corrplot)
 
 
 data<-read_excel("Downloads/Projet Econométrie ETIC/Analyse de données/diabete.xlsx")
-View(data)
+View(diabete)
 
 # Afficher les premières lignes des données
-head(data)
+head(diabete)
 
 # Avoir une vue d'ensemble du dataset
-summary(data)
+summary(diabete)
 
 #Pregnancies : Nombre de grossesses.
 #Glucose : Concentration de glucose dans le plasma.
@@ -65,28 +65,28 @@ boxplot(diabete$Age,main="Âge de la personne",col="blue")
 boxplot(diabete$Outcome,main="Indicateur si la personne est atteinte de diabète (1) ou non (0)",col="blue")
 
 # Vérifier les types de données et les valeurs manquantes
-str(data)
+str(diabete)
 
 #Étape 3 : Prétraitement des données
-#Vérifier et traiter les valeurs manquantes : Parfois, certaines variables comme le glucose, la pression artérielle ou l'insuline peuvent avoir des valeurs manquantes, représentées par des zéros.
-#Remplacer les zéros par NA (valeurs manquantes) :
-#Les variables concernées : Glucose, BloodPressure, SkinThickness, Insulin, BMI.
+#Vérifier et traiter les valeurs manquantes
 
 # Remplacer les zéros par NA dans certaines colonnes
-data <- data %>%
+diabete <- diabete %>%
   mutate(Glucose = ifelse(Glucose == 0, NA, Glucose),
          BloodPressure = ifelse(BloodPressure == 0, NA, BloodPressure),
          SkinThickness = ifelse(SkinThickness == 0, NA, SkinThickness),
          Insulin = ifelse(Insulin == 0, NA, Insulin),
          BMI = ifelse(BMI == 0, NA, BMI))
 
+#Les variables concernées : Glucose, BloodPressure, SkinThickness, Insulin, BMI.
+
 # Vérifier les valeurs manquantes
-summary(data)
+summary(diabete)
 
 #Gérer les valeurs manquantes : Pour simplifier, vous pouvez soit supprimer les lignes avec des valeurs manquantes, soit imputer les données manquantes (par exemple, avec la médiane).
 
 # Imputer les valeurs manquantes avec la médiane
-data <- data %>%
+ diabete<- diabete %>%
   mutate(Glucose = ifelse(is.na(Glucose), median(Glucose, na.rm = TRUE), Glucose),
          BloodPressure = ifelse(is.na(BloodPressure), median(BloodPressure, na.rm = TRUE), BloodPressure),
          SkinThickness = ifelse(is.na(SkinThickness), median(SkinThickness, na.rm = TRUE), SkinThickness),
@@ -98,6 +98,7 @@ par(mfrow=c(1,1),cex=0.7)
 corr.matrix <- cor(diabete)
 corr.matrix
 corrplot(corr.matrix, method = 'square', diag = F, addCoef.col ='black', number.cex = 0.7)
+
 #Les corrélations les plus importantes pour prédire l'issue du diabète semblent être Glucose et BMI. Les autres variables montrent des corrélations plus faibles.
 #Une corrélation élevée entre Glucose et Outcome suggère que la glycémie est un indicateur clé dans la prédiction du diabète.
 #D'autres variables comme l'âge et le nombre de grossesses montrent aussi des corrélations notables entre elles, mais ont un impact plus faible sur le diabète. La matrice aide à identifier les variables clés influençant le diagnostic du diabète.
@@ -112,23 +113,23 @@ corrplot(corr.matrix, method = 'square', diag = F, addCoef.col ='black', number.
 set.seed(123)
 
 # Diviser les données en ensemble d'entraînement (80%) et de test (20%)
-split <- sample.split(data$Outcome, SplitRatio = 0.8)
-train_data <- subset(data, split == TRUE)
-test_data <- subset(data, split == FALSE) #convertir BMI et DiabetesPedigreeFunction avant
+split <- sample.split(diabete$Outcome, SplitRatio = 0.8)
+train_diabete <- subset(diabete, split == TRUE)
+test_diabete <- subset(diabete, split == FALSE) #convertir BMI et DiabetesPedigreeFunction avant
  
 #Convertion de BMI en numérique dans les deux ensembles
 
-train_data$BMI <- as.numeric(as.character(train_data$BMI))
-test_data$BMI <- as.numeric(as.character(test_data$BMI))
+train_diabete$BMI <- as.numeric(as.character(train_diabete$BMI))
+test_diabete$BMI <- as.numeric(as.character(test_diabete$BMI))
 
-train_data$DiabetesPedigreeFunction <- as.numeric(as.character(train_data$DiabetesPedigreeFunction))
-test_data$DiabetesPedigreeFunction <- as.numeric(as.character(test_data$DiabetesPedigreeFunction))
+train_diabete$DiabetesPedigreeFunction <- as.numeric(as.character(train_diabete$DiabetesPedigreeFunction))
+test_diabete$DiabetesPedigreeFunction <- as.numeric(as.character(test_diabete$DiabetesPedigreeFunction))
 
 
 # Vérifier la taille des ensembles
 
-nrow(train_data)
-nrow(test_data)
+nrow(train_diabete)
+nrow(test_diabete)
 
 #Interpretation:
 
@@ -143,10 +144,10 @@ nrow(test_data)
 #Cela signifie que sur l'ensemble total de  nos données initiales, 614 exemples ont été utilisés pour entraîner le modèle, et 154 exemples ont été mis de côté pour tester la performance. Cette répartition permet de vérifier que le modèle apprend bien à partir de 614 cas et peut généraliser correctement à 154 nouveaux cas.
 
 # Entraîner un modèle de régression logistique
-model_logistic <- glm(Outcome ~ ., data = train_data, family = binomial)
+diabete_log <- glm(Outcome ~ ., data = train_diabete, family = binomial)
 
 # Résumé du modèle
-summary(model_logistic)
+summary(diabete_log)
 
 #Interpretation: 
 #Notre modèle de régression logistique nous montre que certaines variables ont un impact significatif sur la probabilité d'avoir le diabète :
@@ -160,7 +161,7 @@ summary(model_logistic)
 #Nous allons faire des prédictions sur l'ensemble de test et évaluer les performances du modèle à l'aide de mesures comme la matrice de confusion.
 
 # Prédire sur l'ensemble de test
-predictions <- predict(model_logistic, test_data, type = "response")
+predictions <- predict(diabete_log, test_diabete, type = "response")
 # Valeurs réelles
 valeurs_reelles <- test_diabete$Outcome  
 
@@ -178,7 +179,7 @@ legend("topright", legend = c("Probabilités prédites", "valeurs réelles"),
 predicted_classes <- ifelse(predictions > 0.5, 1, 0)
 
 # Créer une matrice de confusion
-conf_matrix <- table(test_data$Outcome, predicted_classes)
+conf_matrix <- table(test_diabete$Outcome, predicted_classes)
 
 # Afficher la matrice de confusion
 conf_matrix
@@ -210,10 +211,6 @@ accuracy
 #La courbe ROC (Receiver Operating Characteristic) est un  excellent moyen de visualiser la performance d'un modèle de classification binaire. Elle représente la relation entre le taux de vrais positifs (sensibilité ou recall) et le taux de faux positifs pour différents seuils de décision.
 
 
-# Installer le package pROC si nécessaire
-install.packages("pROC")
-library(pROC)
-
 # Tracer la courbe ROC et calculer l'AUC
 roc_curve <- roc(test_diabete$Outcome, predictions)
 plot(roc_curve, col = "blue", main = "Courbe ROC")
@@ -228,9 +225,6 @@ auc(roc_curve)
 #Étape 8 : Essayer d'autres modèles (Random Forest, SVM, etc.)
 #on peut tester différents algorithmes pour voir lequel donne les meilleures performances. Voici un exemple pour Random Forest et SVM.
 
-# Installer le package randomForest si nécessaire
-install.packages("randomForest")
-library(randomForest)
 
 # Entraîner un modèle Random Forest
 
@@ -238,18 +232,18 @@ library(randomForest)
 
 
 # Convertir Outcome en facteur dans les deux jeux de données
-train_data$Outcome <- as.factor(train_data$Outcome)
-test_data$Outcome <- as.factor(test_data$Outcome)
+train_diabete$Outcome <- as.factor(train_diabete$Outcome)
+test_diabete$Outcome <- as.factor(test_diabete$Outcome)
 
-model_rf <- randomForest(Outcome ~ ., data = train_data, ntree = 100)
+model_rf <- randomForest(Outcome ~ ., data = train_diabete, ntree = 100)
 summary(model_rf)
 
 #Interpretation:
 #Random Forest nous montre les principales composantes du modèle, telles que les prédictions, la matrice de confusion, les votes des arbres pour chaque classe, et les mesures d'importance des variables. Il inclut également des informations sur les taux d'erreur, les valeurs cibles et le nombre d'arbres utilisés. Certaines fonctionnalités avancées comme la proximité et l'importance locale ne sont pas activées. Le modèle est utilisé pour une tâche de classification avec 614 observations dans l'ensemble d'apprentissage.
 
 # Prédictions et évaluation sur l'ensemble de test
-pred_rf <- predict(model_rf, test_data)
-conf_matrix_rf <- table(test_data$Outcome, pred_rf)
+pred_rf <- predict(model_rf, test_diabete)
+conf_matrix_rf <- table(test_diabete$Outcome, pred_rf)
 conf_matrix_rf
 
 Interprétation :
