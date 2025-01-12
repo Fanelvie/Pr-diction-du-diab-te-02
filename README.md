@@ -135,7 +135,12 @@ Les graphiques sont enregistrés dans le répertoire visualisations.
 Exemple d'analyse visuelle
 Le script génère également des graphiques pour explorer les données et les résultats des modèles prédictifs. Voici un exemple de la courbe ROC, qui est utilisée pour évaluer la performance des modèles :
 
-plot(roc_curve)
+`plot(roc_curve)`
+
+
+![performance des modèles](https://github.com/Fanelvie/Pr-diction-du-diab-te-02/blob/69a77906a8d03902c40a46cd1f576beb0b65af75/visualisations/Rplot-Roc.png?raw=true)
+
+
 
 # Contribuer
 
